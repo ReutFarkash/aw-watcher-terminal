@@ -242,27 +242,20 @@ class MessageHandler:
         event = Event(data=event_data, timestamp=args.timestamp)
 
         inserted_heartbeat = self._client.heartbeat(
-            self._buckets["activity"]["id"],
+            self._buckets["activity"]["bucket_id"],
             event,
             pulsetime=self.pulsetime,
             queued=True,
         )
 
-        if inserted_heartbeat and inserted_heartbeat.id:
-            logger.debug("Successfully sent heartbeat")
+        logger.debug("Heartbeat queued/sent")
 
     def _insert_event(self, *args, **kwargs) -> Event:
-        """Send event to the aw-server"""
+        """Send event to the aw-server (aw-client insert_event returns None)."""
         event = Event(*args, **kwargs)
-        inserted_event = self._client.insert_event(
-            self._buckets["commands"]["id"], event
-        )
-
-        # aw-server assigned the event an id
-        assert inserted_event.id is not None
+        self._client.insert_event(self._buckets["commands"]["bucket_id"], event)
         logger.debug("Successfully sent event")
-
-        return inserted_event
+        return event
 
 
 class EventQueue:
